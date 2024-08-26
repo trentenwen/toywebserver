@@ -21,7 +21,7 @@ int main()
     }
     // step 2 - create
     clientSocket = INVALID_SOCKET;
-    clientSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    clientSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (clientSocket == INVALID_SOCKET)
     {
         std::cout << "error at socket()" << WSAGetLastError() << std::endl;
@@ -32,22 +32,12 @@ int main()
     {
         std::cout << "socket() is ok" << std::endl;
     }
-    // step 3 - connect
+    // step 3 - send data via UDP
     sockaddr_in clientService;
     clientService.sin_family = AF_INET;
     clientService.sin_port = htons(10086);
     clientService.sin_addr.s_addr = inet_addr("127.0.0.1");
-    if (connect(clientSocket, (SOCKADDR *)&clientService, sizeof(clientService)) == SOCKET_ERROR)
-    {
-        std::cout << "Client: connect() is fail" << std::endl;
-        WSACleanup();
-        return 0;
-    }
-    else
-    {
-        std::cout << "connect() is ok" << std::endl;
-    }
-    // step 4 - send data via TCP
+    
     std::cout << "Enter your message " << std::endl;
     char buffer[200];
     std::cin.getline(buffer, 200);
@@ -56,10 +46,10 @@ int main()
     char buffer[200] is interpreted as a pointer to the first element -> char*
     if data is an object, we need to do type convert, (char*)&object
      */
-    int byteCount = send(clientSocket, buffer, 200, 0);
+    int byteCount = sendto(clientSocket, buffer, 200, 0, (sockaddr*)&clientService, sizeof(clientService));
     if (byteCount == SOCKET_ERROR)
     {
-        std::cout << "send() error " << WSAGetLastError() << std::endl;
+        std::cout << "sendto() error " << WSAGetLastError() << std::endl;
     }
     else
     {

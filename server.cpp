@@ -20,7 +20,7 @@ int main()
     }
     // step 2 - create
     SOCKET serverSocket = INVALID_SOCKET;
-    serverSocket = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
+    serverSocket = socket(AF_INET, SOCK_DGRAM, IPPROTO_UDP);
     if (serverSocket == INVALID_SOCKET)
     {
         std::cout << "error at socket()" << WSAGetLastError() << std::endl;
@@ -51,35 +51,9 @@ int main()
     {
         std::cout << "bind() is ok" << std::endl;
     }
-    // step 4 - listen
-    if (listen(serverSocket, 1) != 0)
-    {
-        std::cout << "error at listen()" << WSAGetLastError() << std::endl;
-        closesocket(serverSocket);
-        WSACleanup();
-        return 0;
-    }
-    else
-    {
-        std::cout << "listen() is ok, waiting for connections..." << std::endl;
-    }
-    // step 5 - accept
-    /*
-    accept is a block function
-    it will return a duplicated socket, as the descriptor for connection to the client
-     */
-    SOCKET acceptSocket;
-    acceptSocket = accept(serverSocket, NULL, NULL);
-    if (acceptSocket == INVALID_SOCKET)
-    {
-        std::cout << "accept() failed" << WSAGetLastError() << std::endl;
-        WSACleanup();
-        return -1;
-    }
-    std::cout << "accepted connection" << std::endl;
-    // step 6 - receive data via TCP, from a connected socket (descriptor)!
+    // step 4 - receive data via UDP
     char receiveBuffer[200];
-    int byteCount = recv(acceptSocket, receiveBuffer, 200, 0);
+    int byteCount = recvfrom(serverSocket, receiveBuffer, 200, 0, NULL, NULL);
     if (byteCount < 0)
     {
         std::cout << "recv() error " << WSAGetLastError() << std::endl;
